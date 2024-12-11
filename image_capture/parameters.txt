@@ -1,0 +1,8 @@
+UVAnalogGain 1.0
+UVRedGain 1.0
+UVBlueGain 1.0
+UVExposureTime 65.0
+VisAnalogGain 1.0
+VisRedGain 1.0
+VisBlueGain 1.0
+VisExposureTime 65.0
