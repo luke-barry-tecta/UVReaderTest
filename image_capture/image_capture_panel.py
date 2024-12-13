@@ -280,9 +280,9 @@ class ImageCapturePanel(tk.Frame):
         bPreview = False
         bUV = False
 
-        self.pLightController.lightsOn()
+        self.pLightController.WhitelightsOn()
         mapMetadata, arrImage = self.captureImage(bPreview, bUV)
-        self.pLightController.lightsOff()
+        self.pLightController.WhitelightsOff()
         
         self.writeMetadata(mapMetadata, "vis")
         
@@ -301,8 +301,10 @@ class ImageCapturePanel(tk.Frame):
 
         bPreview = False
         bUV = True
-
+        self.pLightController.UVlightsOn()
         mapMetadata, arrImage = self.captureImage(bPreview, bUV)
+        self.pLightController.UVlightsOff()
+
         self.writeMetadata(mapMetadata, "uv")        
         
         self.pUVImage = Image.fromarray(arrImage)
@@ -345,8 +347,10 @@ class ImageCapturePanel(tk.Frame):
         bPreview = True
         bUV = True
         
+        self.pLightController.UVlightsOn()
         mapMetadata, arrImage = self.captureImage(bPreview, bUV)
-        
+        self.pLightController.UVlightsOff()
+
         self.pUVImage = Image.fromarray(arrImage)
         self.pUVImage.save("preview_uv.tiff")
         self.pUVPhotoImage = ImageTk.PhotoImage(self.pUVImage.resize((self.nImageWidth, self.nImageHeight), resample=Image.Resampling.LANCZOS))
