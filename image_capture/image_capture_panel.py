@@ -55,6 +55,7 @@ def getCountString(nCount):
         strReturn = str(nCount)
     return strReturn
 
+#class which creates a progress bar (the green indicator)
 class ProgressRunner:
     
     def __init__(self, pProgressBar):
@@ -64,6 +65,7 @@ class ProgressRunner:
     def __del__(self):
         self.pProgressBar.stop()
 
+#define sliders with a label
 def addSlider(pParent, strLabel, nLow, nHigh, fResolution):
     pPanel = tk.Frame(pParent)
     dvarVariable = tk.DoubleVar()
@@ -139,7 +141,7 @@ class ImageCapturePanel(tk.Frame):
 
         # images
         self.nImageWidth = nFrameWidth//2 # rescale to fit
-        self.nImageHeight = (self.nImageWidth*480)//640 # rescale to fit
+        self.nImageHeight = (self.nImageWidth*300)//640 # rescale to fit 480)//640
         self.pVisImage = Image.fromarray(np.zeros([self.nImageHeight, self.nImageWidth, 3], dtype=np.uint8))
         self.pVisPhotoImage = ImageTk.PhotoImage(self.pVisImage)
         self.pVisPanel = tk.Label(pTopPanel, image = self.pVisPhotoImage)
@@ -160,6 +162,7 @@ class ImageCapturePanel(tk.Frame):
         self.dvarAnalogGain = addSlider(pGainPanel, "AG:", 0, 16, 0.2)
         self.dvarRedGain = addSlider(pGainPanel, "RG:", 0, 32, 0.2)
         self.dvarBlueGain = addSlider(pGainPanel, "BG:", 0, 32, 0.2)
+        self.WhiteLEDPWM = addSlider(pGainPanel, "WLED:", 0, 100, 1)
         pGainPanel.pack(side="left", anchor="w", fill=tk.Y)
 
         pResetButtonPanel = tk.Frame(pBottomPanel) # gain reset button
@@ -223,7 +226,7 @@ class ImageCapturePanel(tk.Frame):
 
         # ensure we write the new state at exit
         atexit.register(self.writeState)
-
+        
     def processVis(self):
         
         pRunner = ProgressRunner(self.pProgressbar)
@@ -279,8 +282,9 @@ class ImageCapturePanel(tk.Frame):
         
         bPreview = False
         bUV = False
+        fWhiteLEDPWM = self.WhiteLEDPWM.get()
 
-        self.pLightController.WhitelightsOn()
+        self.pLightController.WhitelightsOn(fWhiteLEDPWM)
         mapMetadata, arrImage = self.captureImage(bPreview, bUV)
         self.pLightController.WhitelightsOff()
         
@@ -327,10 +331,10 @@ class ImageCapturePanel(tk.Frame):
         
         bPreview = True
         bUV = False
-
-        self.pLightController.lightsOn()
+        fWhiteLEDPWM = self.WhiteLEDPWM.get()
+        self.pLightController.WhitelightsOn(fWhiteLEDPWM)
         mapMetadata, arrImage = self.captureImage(bPreview, bUV)
-        self.pLightController.lightsOff()
+        self.pLightController.WhitelightsOff()
         
         self.pVisImage = Image.fromarray(arrImage)
         self.pVisImage.save("preview_vis.tiff")
@@ -363,6 +367,7 @@ class ImageCapturePanel(tk.Frame):
         fAnalogGain = self.dvarAnalogGain.get()
         fRedGain = self.dvarRedGain.get()
         fBlueGain = self.dvarBlueGain.get()
+        
         nExposureTime_us = int(1000*self.dvarExposureTime_ms.get())
         
         return self.pCameraController.captureImage(fAnalogGain, fRedGain, fBlueGain, nExposureTime_us, bPreview, bUV)

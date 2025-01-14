@@ -1,19 +1,20 @@
 import atexit
-
-import rpi_hardware_pwm import HardwarePWM
+import os
+from rpi_hardware_pwm import HardwarePWM
 import RPi.GPIO as GPIO
-class LightController:
 
+class LightController:
+    #initializing all settings for hardware pwm on 0
     def __init__(self):
         # GPIO pin settings
         GPIO.setmode(GPIO.BCM)
         #white
-        pwm1 = HardwarePWM(pwm_chennel=0, hz=60, chip=0)
+        self.pwm1 = HardwarePWM(pwm_chennel=0, hz=60, chip=0)
         #UV
-        pwm2 = HardwarePWM(pwm=channel=1, hz=60, chip=0)
+        self.pwm2 = HardwarePWM(pwm_channel=1, hz=60, chip=0)
         #inversed so off = duty cycle of 100
-        pwm1.start(100)
-        pwm2.start(100)
+        self.pwm1.start(100)
+        self.pwm2.start(100)
 
         #white(16(left), 20(right)) UV(19(left), 26(right))
         self.lstHighPins = [16, 19, 20, 26]
@@ -26,8 +27,9 @@ class LightController:
         GPIO.output(19, GPIO.LOW)
 
     #turn the White lights on        
-    def WhitelightsOn(self):
-        pwm1.change_duty_cycle(50)
+    def WhitelightsOn(self, slider):
+        dutycycle = 100-slider
+        self.pwm1.change_duty_cycle(dutycycle)
         GPIO.output(16, GPIO.HIGH)
         GPIO.output(19, GPIO.HIGH)
 
@@ -39,7 +41,8 @@ class LightController:
 
     #turn the UV lights on        
     def UVlightsOn(self):
-        pwm2.change_duty_cycle(50)
+        #likely needs to change
+        self.pwm2.change_duty_cycle(0)
         GPIO.output(20, GPIO.HIGH)
         GPIO.output(26, GPIO.HIGH)
     
