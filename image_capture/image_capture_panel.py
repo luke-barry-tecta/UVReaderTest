@@ -27,6 +27,8 @@ from quanti_tray import QuantiTray
 from constants import *
 from write_images import writeTagged
 
+isOn = False
+
 def validateReadOnly(): 
     return False
 
@@ -127,9 +129,9 @@ class ImageCapturePanel(tk.Frame):
         if bIsRPi:
             # load real camera and light controllers
             from camera_controller import CameraController
-            from light_controller import LightController            
+            from light_controller import LightandFanController            
             self.pCameraController = CameraController(self.strDirectory)
-            self.pLightController = LightController()            
+            self.pLightController = LightandFanController()            
         else:
             from dummy_camera_controller import DummyCameraController
             from dummy_light_controller import DummyLightController            
@@ -173,7 +175,7 @@ class ImageCapturePanel(tk.Frame):
         pResetButtonPanel.pack(side="left", anchor="w", fill=tk.Y)
 
         pExposurePanel = tk.Frame(pBottomPanel) # exposure time setting
-        self.dvarExposureTime_ms = addSlider(pExposurePanel, "Exposure (ms):", 0, 500, 5)
+        self.dvarExposureTime_ms = addSlider(pExposurePanel, "Exp (ms):", 0, 500, 5)
         self.dvarExposureTime_ms.set(65)
         tk.Button(pExposurePanel, text="Reset Exposure", command=self.resetExposure).pack(side="top", fill=tk.BOTH, anchor="n", expand="yes")
 
@@ -182,7 +184,8 @@ class ImageCapturePanel(tk.Frame):
         tk.Button(pVisPanel, text="Load Vis", command=self.loadVisParams).pack(side="left", fill=tk.BOTH, anchor="w", expand="yes")
         pVisPanel.pack(side="top", fill=tk.BOTH, anchor="n", expand="yes")
         
-        pUVPanel = tk.Frame(pExposurePanel)        
+        pUVPanel = tk.Frame(pExposurePanel)   
+        tk.Button(pUVPanel, text="Fan", command=self.setFan).pack(side="left", fill=tk.BOTH, anchor="w", expand="yes")     
         tk.Button(pUVPanel, text="Save UV", command=self.saveUVParams).pack(side="left", fill=tk.BOTH, anchor="w", expand="yes")
         tk.Button(pUVPanel, text="Load UV", command=self.loadUVParams).pack(side="left", fill=tk.BOTH, anchor="w", expand="yes")
         pUVPanel.pack(side="top", fill=tk.BOTH, anchor="n", expand="yes")
@@ -404,6 +407,18 @@ class ImageCapturePanel(tk.Frame):
         self.mapParameters["UVRedGain"] = self.dvarRedGain.get()
         self.mapParameters["UVBlueGain"] = self.dvarBlueGain.get()
         self.mapParameters["UVExposureTime"] = self.dvarExposureTime_ms.get()
+    
+    def setFan(self):
+        global isOn
+        if isOn == True:
+            self.pLightController.fanOff
+            isOn = False
+            print("Fan Off")
+        else:
+            self.pLightController.fanOn
+            isOn = True 
+            print("Fan On")  
+
         
     def loadVisParams(self):
         print("Loading Vis")
